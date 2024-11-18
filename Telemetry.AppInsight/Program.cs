@@ -9,12 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Logging.AddApplicationInsights(
-    configureTelemetryConfiguration: telemetryConfig => telemetryConfig.ConnectionString =
-        "InstrumentationKey=47da8b49-b36a-42dc-b9a0-94032f40902e;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/;LiveEndpoint=https://westus2.livediagnostics.monitor.azure.com/;ApplicationId=96350192-e66a-48a7-a2c4-d1eeef70184f",
-    loggerOptions => 
-    {
-        loggerOptions.IncludeScopes = true;
-    });
+    configureTelemetryConfiguration: telemetryConfig =>
+        telemetryConfig.ConnectionString = Environment.GetEnvironmentVariable("AppInsight__ConnectionString"),
+    loggerOptions => { loggerOptions.IncludeScopes = true; });
 
 builder.Services.AddApplicationInsightsTelemetry();
 
@@ -83,7 +80,7 @@ app.MapPost("/validate", async ([FromBody] Person person, TelemetryClient teleme
         Type = "InProc",
         Context =
         {
-            GlobalProperties = 
+            GlobalProperties =
             {
                 ["email"] = person.Email
             }

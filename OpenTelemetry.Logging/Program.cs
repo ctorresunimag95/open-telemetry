@@ -95,8 +95,7 @@ builder.Services
     })
     .UseAzureMonitor(options =>
     {
-        options.ConnectionString =
-            "InstrumentationKey=47da8b49-b36a-42dc-b9a0-94032f40902e;IngestionEndpoint=https://westus2-2.in.applicationinsights.azure.com/;LiveEndpoint=https://westus2.livediagnostics.monitor.azure.com/;ApplicationId=96350192-e66a-48a7-a2c4-d1eeef70184f";
+        options.ConnectionString = Environment.GetEnvironmentVariable("AppInsight__ConnectionString");
     })
     ;
 
