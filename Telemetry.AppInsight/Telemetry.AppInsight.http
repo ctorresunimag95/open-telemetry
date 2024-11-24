@@ -1,6 +1,0 @@
-@Telemetry.AppInsight_HostAddress = http://localhost:5197
-
-GET {{Telemetry.AppInsight_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
