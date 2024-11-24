@@ -1,14 +1,13 @@
-using OpenTelemetry.Logs;
-using OpenTelemetry.Resources;
-using Azure.Monitor.OpenTelemetry.AspNetCore;
-using OpenTelemetry.Logging.Processors;
-using OpenTelemetry.Trace;
-using OpenTelemetry.Logging;
-using OpenTelemetry.Metrics;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpLogging;
+using OpenTelemetry.Logging;
 using OpenTelemetry.Logging.Meters;
 using OpenTelemetry.Logging.Middlewares;
-using Microsoft.AspNetCore.Http.Features;
+using OpenTelemetry.Logging.Processors;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +27,7 @@ var resourceBuilder = ResourceBuilder
             ["service.division"] = "Avengers",
             ["service.teamName"] = "MyAwesomeTeam",
             ["environment"] =
-                builder.Environment.EnvironmentName.ToLowerInvariant(),
+                builder.Environment.EnvironmentName.ToLowerInvariant()
         })
     ;
 
@@ -41,6 +40,8 @@ builder.Logging
     ;
 
 // Logging & Open telemetry
+var jaegerEndpoint = new Uri(Environment.GetEnvironmentVariable("Jaeger_Endpoint")!);
+var otlpEnpoint = new Uri(Environment.GetEnvironmentVariable("OTLP_Endpoint")!);
 builder.Services
     .AddOpenTelemetry()
     .ConfigureResource(r => r.AddService(Constants.AppName))
@@ -49,6 +50,10 @@ builder.Services
         logging.SetResourceBuilder(resourceBuilder)
             //.AddConsoleExporter()
             ;
+
+        logging.AddOtlpExporter(options =>
+            options.Endpoint = otlpEnpoint
+        );
 
         logging.AddProcessor<ActivityLogProcessor>()
             .AddProcessor<CorrelationIdLogProcessor>()
@@ -71,7 +76,11 @@ builder.Services
                 //    !httpContext.Request.Path.Value?.EndsWith("/health") ?? false;
             })
             .AddHttpClientInstrumentation()
-            //.AddConsoleExporter()
+            ;
+        tracing.AddOtlpExporter(options =>
+                options.Endpoint = otlpEnpoint
+            )
+            // .AddConsoleExporter()
             ;
 
         tracing
@@ -92,11 +101,17 @@ builder.Services
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             ;
+
+        metrics.AddOtlpExporter(options =>
+            options.Endpoint = otlpEnpoint
+        );
+
+        // metrics.AddPrometheusExporter();
     })
-    .UseAzureMonitor(options =>
-    {
-        options.ConnectionString = Environment.GetEnvironmentVariable("AppInsight__ConnectionString");
-    })
+    // .UseAzureMonitor(options =>
+    // {
+    //     options.ConnectionString = Environment.GetEnvironmentVariable("AppInsight__ConnectionString");
+    // })
     ;
 
 builder.Services.AddSingleton(TracerProvider.Default.GetTracer(Constants.AppName));
@@ -138,6 +153,8 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 var app = builder.Build();
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+
+// app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 app.UseExceptionHandler();
 

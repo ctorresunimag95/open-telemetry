@@ -7,6 +7,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTelemetry.Logging", "Op
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telemetry.AppInsight", "Telemetry.AppInsight\Telemetry.AppInsight.csproj", "{3110F432-450F-49F8-9692-2DC347DEE316}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3B69BB2C-52EB-491C-AF35-08A892F4F7F8}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+		prometheus.yml = prometheus.yml
+		grafana-datasources.yml = grafana-datasources.yml
+		otel-collector-config.yml = otel-collector-config.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

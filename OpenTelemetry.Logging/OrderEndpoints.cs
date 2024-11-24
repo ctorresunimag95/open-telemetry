@@ -13,7 +13,9 @@ public static class OrderEndpoints
         {
             entryMeter.IncreaseOrderCreatedCounter();
 
-            entryMeter.RecordOrderAmount(orderCommand.Amount, orderCommand.Country, orderCommand.City);
+            entryMeter.RecordOrderAmountHistogram(orderCommand.Amount, orderCommand.Country, orderCommand.City);
+            
+            entryMeter.RecordOrderAmountCounter(orderCommand.Amount, orderCommand.Country, orderCommand.City);
 
             return orderCommand;
         });

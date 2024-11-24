@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
-using OpenTelemetry.Trace;
 using System.Diagnostics;
+using OpenTelemetry.Trace;
 
 namespace OpenTelemetry.Logging;
 
@@ -66,27 +66,24 @@ public static class Endpoints
             {
                 span?.AddEvent(new ActivityEvent("ValidatingCredit", tags: ApplicationDiagnostics.DefaultTags));
 
-                // ToDo: Add record exception
-                // activity.RecordException()
-
                 if (person.Age < 20)
                 {
-                    //span?.SetStatus(ActivityStatusCode.Error, "Invalid Age");
-                    span?.SetStatus(Status.Error.WithDescription("Invalid Age"));
+                    span?.SetStatus(ActivityStatusCode.Error, "Invalid Age");
+                    // span?.SetStatus(Status.Error.WithDescription("Invalid Age"));
                     return Results.BadRequest("Invalid Age");
                 }
 
                 if (person.Location != "US")
                 {
-                    //span?.SetStatus(ActivityStatusCode.Error, "Invalid location");
-                    span?.SetStatus(Status.Error.WithDescription("Invalid location"));
+                    span?.SetStatus(ActivityStatusCode.Error, "Invalid location");
+                    // span?.SetStatus(Status.Error.WithDescription("Invalid location"));
                     return Results.BadRequest("Invalid location");
                 }
 
                 if (person.CreditScore < 75M)
                 {
-                    //span?.SetStatus(ActivityStatusCode.Error, "Invalid credit score");
-                    span?.SetStatus(Status.Error.WithDescription("Invalid credit score"));
+                    span?.SetStatus(ActivityStatusCode.Error, "Invalid credit score");
+                    // span?.SetStatus(Status.Error.WithDescription("Invalid credit score"));
                     return Results.BadRequest("Invalid credit score");
                 }
             }
@@ -135,7 +132,12 @@ public static class Endpoints
 
         app.MapGet("/throw", () => 
         {
-            throw new Exception("Application just crashed!");
+            var exception = new Exception("Application just crashed!");
+            Activity.Current?.SetStatus(ActivityStatusCode.Error, exception.Message);
+            
+            Activity.Current?.AddException(exception);
+            
+            return Results.Problem(title: exception.Message);
         });
 
         return app;
